@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:planet_news/app_constant/color_const.dart';
 import 'package:planet_news/app_constant/country_list.dart';
 import 'package:planet_news/app_constant/string_const.dart';
 import 'package:planet_news/app_constant/ui_constant.dart';
 import 'package:planet_news/enum/app_status.dart';
 import 'package:planet_news/model/countries_list_model.dart';
+import 'package:planet_news/singleton/singletonConsts.dart';
 import 'package:planet_news/view_model/countriesList_view_model.dart';
 import 'package:planet_news/views/signin_screen.dart';
 import 'package:planet_news/widgets/custom_button.dart';
@@ -14,19 +16,23 @@ import 'package:planet_news/view_model/signup_view_model.dart';
 import 'package:planet_news/widgets/full_screen_loader.dart';
 
 import 'otp_screen.dart';
+
 import 'package:provider/provider.dart';
 // import 'package:auth_buttons/auth_buttons.dart' show GoogleAuthButton, AuthButtonStyle, AuthButtonType, AuthIconType;
 import 'package:google_sign_in/google_sign_in.dart';
 
 
-class SignupScreen extends StatefulWidget {
-  static const String id = 'SignUpScreen';
+class GoogleSignUp extends StatefulWidget {
+  static const String id = 'GoogleSignUpScreen';
+
 
   @override
-  _SignupScreenState createState() => _SignupScreenState();
+  _GoogleSignUpState createState() => _GoogleSignUpState();
+
 }
 
-class _SignupScreenState extends State<SignupScreen> {
+class _GoogleSignUpState extends State<GoogleSignUp> {
+
 
   var genderList = [
     "Male",
@@ -48,6 +54,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   late String fullName;
 
+  String CountryID="";
+
   TextEditingController txtFnameController = new TextEditingController();
 
   TextEditingController txtlnameController = new TextEditingController();
@@ -55,45 +63,28 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController txtemailController = new TextEditingController();
 
   TextEditingController txtpasswordController = new TextEditingController();
+
+  TextEditingController phoneNumberController = new TextEditingController();
   List<String> countriesList=[];
-  String? Useremail;
+  String? Useremail = Singleton.googleEmail;
   String? DisplayName;
-
-  Future<dynamic> getAllCountries()async
-  {
-    // var countries =
-    // return countries;
-  }
-  void countrymethod()async
-  {
-    // var countries = await getAllCountries();
-    // print(countries);
-    // countriesList = await Provider.of<CountriesListViewModel>(
-    //     context, listen: false).getAllCountries();
-    // for (var i in countriesList){
-    //   print("Country is: $i");
-    //
-    // }
-  }
-
-
 
   @override
   void initState() {
-
+    // TODO: implement initState
     super.initState();
     //
 
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
       Provider.of<CountriesListViewModel>(context, listen: false).getAllCountries();
     });
+
   }
   @override
+
   Widget build(BuildContext context) {
-    // CountriesModel country_model = Provider.of<CountriesModel>(context);
     SignupViewModel _signupViewModel = Provider.of<SignupViewModel>(context);
     CountriesListViewModel _countriesViewModel = Provider.of<CountriesListViewModel>(context);
-
     return Scaffold(
         backgroundColor: ColorConst.screen_bg,
         body: (_countriesViewModel.getAppStatus == AppStatus.LOADING || _signupViewModel.getAppStatus == AppStatus.LOADING) ? FullScreenLoader() : SingleChildScrollView(
@@ -124,6 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         Expanded(
                           child: SimpleInputField(
                             // txtController: txtFnameController..text = "Faizan",
+                            txtController: txtFnameController,
                             labelText: "First Name",
                             secureText: false,
                             inputType: TextInputType.text,
@@ -155,9 +147,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       labelText: "Enter Your Email",
                       secureText: false, inputType: TextInputType.emailAddress,
                       inputAction: TextInputAction.next,
-                      txtController: txtemailController..text = "$Useremail",
+                      txtController: txtemailController..text = (Useremail==''?'':Useremail)!,
                       onChanged: (value){
-
                       },
 
                     ),
@@ -188,6 +179,13 @@ class _SignupScreenState extends State<SignupScreen> {
 
                                     countryvalue = value!;
                                     print(countryvalue);
+                                    _countriesViewModel.countryList.forEach((element) {
+                                      if(element.nicename == value)
+                                        {
+                                          print("CountryID: ${element.id}");
+                                          CountryID = element.id;
+                                        }
+                                    });
                                   });
 
                                 },
@@ -223,6 +221,31 @@ class _SignupScreenState extends State<SignupScreen> {
                           //child: SimpleInputField(labelText: "First Name", secureText: false, inputType: TextInputType.text, inputAction: TextInputAction.next,),
                         ),
                       ],
+                    ),
+                    SizedBox(height: 20,),
+                    Container(
+                      decoration: StringConst.textFieldContainerDec,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: InternationalPhoneNumberInput(
+                          textFieldController: phoneNumberController,
+                          errorMessage: "Please Enter Valid Phone Number",
+                          inputBorder: InputBorder.none,
+                          autoFocusSearch: true,
+                          // inputDecoration: InputDecoration(
+                          //   contentPadding: EdgeInsets.only(bottom: 15,left: 0),
+                          // ),
+                          selectorConfig: SelectorConfig(
+                            selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                          ),
+                          onInputChanged: (PhoneNumber phNumber)
+                          {
+                            String? Number;
+                            Number = phNumber.phoneNumber;
+                            print(phNumber.phoneNumber);
+                          }
+                        ),
+                      ),
                     ),
                     SizedBox(height: 20,),
                     Row(
@@ -265,59 +288,73 @@ class _SignupScreenState extends State<SignupScreen> {
                       print("Name: + $fullName");
                       print("Name: + $email");
                       print("Name: + $password");
+                      print("Google AuthID + ${Singleton.googleAuthID}");
 
 
                       await Provider.of<SignupViewModel>(context,listen: false).registerUser
-                        (fullName, email, password,dropdownvalue,"03356727047");
+                        (fullName, email, password,phoneNumberController.value.text,dropdownvalue,"Google",Singleton.googleAuthID,CountryID);
 
 
                       String strMsg = _signupViewModel.registerMsg;
-                      showSnackBar(context: context, message: strMsg, mColor: Colors.grey);
+
 
                       // showSnackBar(context: context, message: _signinViewModel.getSigninModel.data[0].name, mColor: Colors.grey);
                       print(_signupViewModel.getSignUpModel.data[0].msg);
+                      if(_signupViewModel.getSignUpModel.data[0].success=="1"){
+                        showSnackBar(context: context, message:"Successfully Registered", mColor: Colors.grey);
+                      }
+
+                      // await Provider.of<SignupViewModel>(context,listen: false).registerUser
+                      //   (fullName, email, password,dropdownvalue,"03356727047");
+                      //
+                      //
+                      // String strMsg = _signupViewModel.registerMsg;
+                      // showSnackBar(context: context, message: strMsg, mColor: Colors.grey);
+                      //
+                      // // showSnackBar(context: context, message: _signinViewModel.getSigninModel.data[0].name, mColor: Colors.grey);
+                      // print(_signupViewModel.getSignUpModel.data[0].msg);
 
 
 
 
 
-                      Navigator.pushNamed(context, OptContainer.id);
+                      Navigator.pushNamed(context, SignInScreen.id);
                     }, btnText: "SIGN UP"),
-                    SizedBox(height: 15,),
-                    Text("or Sign Up with", style: TextStyle(fontSize: 16, fontFamily: "Montserrat", fontWeight: FontWeight.w700),),
-                    SizedBox(height: 15,),
+                    // SizedBox(height: 15,),
+                    // Text("or Sign Up with", style: TextStyle(fontSize: 16, fontFamily: "Montserrat", fontWeight: FontWeight.w700),),
+                    // SizedBox(height: 15,),
                     // Text(Useremail==null? '': Useremail.toString()),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-
-                          },
-                          child: Container(
-                            height: 40,
-                            child: Image.asset("assets/fb_logo.png"),
-                          ),
-                        ),
-
-                        TextButton(
-                          onPressed: ()async{
-                            var googleUser = await GoogleSignIn().signIn();
-                            print(googleUser!.displayName);
-                            print(googleUser.email);
-                            setState(() {
-                              Useremail=googleUser.email;
-                              DisplayName=googleUser.displayName;
-                            });
-                            print(googleUser.id);
-                          },
-                          child: Container(
-                            height: 40,
-                            child: Image.asset("assets/gmail_logo.png"),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    //   children: [
+                    //     TextButton(
+                    //       onPressed: () {
+                    //
+                    //       },
+                    //       child: Container(
+                    //         height: 40,
+                    //         child: Image.asset("assets/fb_logo.png"),
+                    //       ),
+                    //     ),
+                    //
+                    //     TextButton(
+                    //       onPressed: ()async{
+                    //         var googleUser = await GoogleSignIn().signIn();
+                    //         print(googleUser!.displayName);
+                    //         print(googleUser.email);
+                    //         setState(() {
+                    //           Useremail=googleUser.email;
+                    //           DisplayName=googleUser.displayName;
+                    //         });
+                    //         print(googleUser.id);
+                    //       },
+                    //       child: Container(
+                    //         height: 40,
+                    //         child: Image.asset("assets/gmail_logo.png"),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
 
 
                   ],
