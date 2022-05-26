@@ -1,3 +1,6 @@
+import 'package:fluttertoast/fluttertoast.dart';
+
+
 class AppException implements Exception {
   final _message;
   final _prefix;
@@ -18,6 +21,8 @@ class NoInternetException extends AppException {
 class SlowInternetException extends AppException {
   SlowInternetException({required String message})
       : super('Slow Internet: ', message);
+
+
 }
 
 class FetchDataException extends AppException {

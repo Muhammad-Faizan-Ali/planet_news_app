@@ -20,6 +20,7 @@ class Data {
     required this.userId,
     required this.name,
     required this.email,
+    required this.confirmed,
     required this.msg,
     required this.authId,
     required this.success,
@@ -27,6 +28,7 @@ class Data {
   late final String userId;
   late final String name;
   late final String email;
+  late final String confirmed;
   late final String msg;
   late final String authId;
   late final String success;
@@ -35,6 +37,7 @@ class Data {
     userId = json['user_id'] == null ? "" : json['user_id'];
     name = json['name'] == null ? "" : json['name'];
     email = json['email'] == null ? "" : json['email'];
+    confirmed = json['confirmed'];
     msg = json['msg'];
     authId = json['auth_id'] == null ? "" : json['auth_id'];
     success = json['success'];

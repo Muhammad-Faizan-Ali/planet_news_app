@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:planet_news/exceptions/app_exceptions.dart';
 
 class ApiBaseHelper {
@@ -17,13 +18,16 @@ class ApiBaseHelper {
       await Dio().get(_baseUrl + url, queryParameters: params).timeout(
         const Duration(seconds: _TIMEOUT),
         onTimeout: () {
+          Fluttertoast.showToast(msg: "Your internet is too slow check your internet connection");
           throw SlowInternetException(
             message: 'Your internet is too slow check your internet connection',
           );
+
         },
       );
       jsonResponse = _returnResponse(response);
     } on TimeoutException {
+      Fluttertoast.showToast(msg: "Something went wrong, your internet may be slow");
       throw FetchDataException(
         message: 'Something went wrong, your internet may be slow',
       );
@@ -44,6 +48,7 @@ class ApiBaseHelper {
       await Dio().post(_baseUrl, data: body).timeout(
         Duration(seconds: _TIMEOUT),
         onTimeout: () {
+          Fluttertoast.showToast(msg: "Your internet is too slow check your internet connection");
           throw SlowInternetException(
             message: 'Your internet is too slow check your internet connection',
           );
@@ -51,10 +56,12 @@ class ApiBaseHelper {
       );
       jsonResponse = _returnResponse(response);
     } on TimeoutException {
+      Fluttertoast.showToast(msg: "Something went wrong, your internet may be slow");
       throw FetchDataException(
         message: 'Something went wrong, your internet may be slow',
       );
     } on SocketException {
+      Fluttertoast.showToast(msg: "Check your internet connection");
       throw NoInternetException(message: 'Check your internet connection');
     } on DioError catch (e) {
       _handleDioError(e);

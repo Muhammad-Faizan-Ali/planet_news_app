@@ -15,31 +15,31 @@ import 'package:country_picker/country_picker.dart';
 import 'package:planet_news/view_model/signup_view_model.dart';
 import 'package:planet_news/widgets/full_screen_loader.dart';
 
-import 'otp_screen.dart';
+
 
 import 'package:provider/provider.dart';
 // import 'package:auth_buttons/auth_buttons.dart' show GoogleAuthButton, AuthButtonStyle, AuthButtonType, AuthIconType;
 import 'package:google_sign_in/google_sign_in.dart';
 
 
-class GoogleSignUp extends StatefulWidget {
+class SocialSignUp extends StatefulWidget {
   static const String id = 'GoogleSignUpScreen';
+
+  SocialSignUp({
+    required this.SignUpType,
+});
+  String SignUpType;
 
 
   @override
-  _GoogleSignUpState createState() => _GoogleSignUpState();
-
+  _SocialSignUpState createState() => _SocialSignUpState();
 }
-
-class _GoogleSignUpState extends State<GoogleSignUp> {
-
-
+class _SocialSignUpState extends State<SocialSignUp> {
   var genderList = [
     "Male",
     "Female",
 
   ];
-
   String dropdownvalue="Male";
 
   String countryvalue = "Pakistan";
@@ -60,14 +60,16 @@ class _GoogleSignUpState extends State<GoogleSignUp> {
 
   TextEditingController txtlnameController = new TextEditingController();
 
-  TextEditingController txtemailController = new TextEditingController();
+  TextEditingController txtemailController = new TextEditingController(
+    text: Singleton.SocialEmail,
+  );
 
-  TextEditingController txtpasswordController = new TextEditingController();
+  TextEditingController txtpasswordController = new TextEditingController(
+
+  );
 
   TextEditingController phoneNumberController = new TextEditingController();
   List<String> countriesList=[];
-  String? Useremail = Singleton.googleEmail;
-  String? DisplayName;
 
   @override
   void initState() {
@@ -147,7 +149,7 @@ class _GoogleSignUpState extends State<GoogleSignUp> {
                       labelText: "Enter Your Email",
                       secureText: false, inputType: TextInputType.emailAddress,
                       inputAction: TextInputAction.next,
-                      txtController: txtemailController..text = (Useremail==''?'':Useremail)!,
+                      txtController: txtemailController..text = (Singleton.SocialEmail==''?'':Singleton.SocialEmail),
                       onChanged: (value){
                       },
 
@@ -288,11 +290,18 @@ class _GoogleSignUpState extends State<GoogleSignUp> {
                       print("Name: + $fullName");
                       print("Name: + $email");
                       print("Name: + $password");
-                      print("Google AuthID + ${Singleton.googleAuthID}");
+                      print("Google AuthID + ${Singleton.SocialAuthID}");
 
 
                       await Provider.of<SignupViewModel>(context,listen: false).registerUser
-                        (fullName, email, password,phoneNumberController.value.text,dropdownvalue,"Google",Singleton.googleAuthID,CountryID);
+                        (fullName,
+                          email,
+                          password,
+                          phoneNumberController.value.text,
+                          dropdownvalue,
+                          "${widget.SignUpType}}",
+                          Singleton.SocialAuthID!,
+                          CountryID);
 
 
                       String strMsg = _signupViewModel.registerMsg;

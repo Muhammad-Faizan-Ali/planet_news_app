@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name= "app_name">Planet News</string>
+    <string name="facebook_app_id">677289536685201</string>
+    <string name="fb_login_protocol_scheme">fb677289536685201</string>
+    <string name="facebook_client_token">c52c1c6d243ef92f39ae5cd3f1b34255</string>
+</resources>

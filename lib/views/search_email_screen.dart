@@ -52,17 +52,17 @@ class SearchEmail extends StatelessWidget {
                           obscureText: false,
                           textAlign: TextAlign.left,
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 16,
                           ),
                           cursorColor: Colors.black.withOpacity(0.8),
                           decoration: InputDecoration(
 
                             hintText: "Enter Your Mail Or Number",
-                            hintStyle: TextStyle(fontSize: 18),
+                            hintStyle: TextStyle(fontSize: 17),
                             fillColor: Colors.white,
                             filled: true,
                             contentPadding:
-                            EdgeInsets.symmetric(horizontal: 20,),
+                            EdgeInsets.symmetric(horizontal: 10,),
                             focusedBorder: OutlineInputBorder(
                               borderSide: BorderSide(color: Colors.black.withOpacity(0.5)),
                             ),

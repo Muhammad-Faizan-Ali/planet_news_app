@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:planet_news/app_constant/color_const.dart';
 import 'package:planet_news/app_constant/string_const.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:planet_news/app_constant/decorations.dart';
+import 'package:planet_news/app_constant/ui_constant.dart';
+import 'package:planet_news/enum/app_status.dart';
+import 'package:planet_news/singleton/singletonConsts.dart';
+import 'package:planet_news/view_model/ConfirmOTP_view_model.dart';
+import 'package:planet_news/views/signin_screen.dart';
+import 'package:planet_news/widgets/full_screen_loader.dart';
+import 'package:provider/provider.dart';
+import 'package:planet_news/view_model/resendOTPViewModel.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 class OptContainer extends StatelessWidget {
@@ -11,9 +21,12 @@ class OptContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
+    ConfirmOTPViewModel _confirmOTPViewModel = Provider.of<ConfirmOTPViewModel>(context);
+
     return Scaffold(
       backgroundColor: ColorConst.screen_bg,
-      body: SingleChildScrollView(
+        // (_confirmOTPViewModel.getAppStatus == AppStatus.LOADING) ? FullScreenLoader() :
+      body:  SingleChildScrollView(
         child: Column(
           children: [
             Container(
@@ -25,7 +38,7 @@ class OptContainer extends StatelessWidget {
               width: double.infinity,
               // height: 380,
               padding: EdgeInsets.all(30),
-              margin: EdgeInsets.symmetric(horizontal: 40),
+              margin: EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(30),
@@ -61,7 +74,9 @@ class OptContainer extends StatelessWidget {
                   ),
 
                   SizedBox(height: MediaQuery.of(context).size.height*0.02),
-                  Text("Enter a 4 digit Code",style: TextStyle(fontSize: 16, fontFamily: "Montserrat", fontWeight: FontWeight.w700),),
+                  Text("Enter a 6 digit Code",style: TextStyle(fontSize: 16, fontFamily: "Montserrat", fontWeight: FontWeight.w700),),
+                  Text("We Have Sent to your Email Address",style: TextStyle(fontSize: 14, fontFamily: "Montserrat", fontWeight: FontWeight.w400),),
+
                   SizedBox(height: MediaQuery.of(context).size.height*0.02),
 
 
@@ -70,7 +85,17 @@ class OptContainer extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Text("Resend Code",textAlign: TextAlign.right,style: TextStyle(fontSize: 16, fontFamily: "Montserrat", fontWeight: FontWeight.w700),),
+                      TextButton(
+                        onPressed: (){
+                          Provider.of<ResendOTPViewModel>(context,listen: false).getResendOTP(Singleton.userEmail);
+                          if(Provider.of<ResendOTPViewModel>(context,listen: false).getSuccessMsg == "1")
+                            {
+                              Fluttertoast.showToast(
+                                msg: "We Have Send an OTP on your Email Address",
+                              );
+                            }
+                        },
+                          child: Text("Resend Code",textAlign: TextAlign.right,style: TextStyle(fontSize: 16, fontFamily: "Montserrat", fontWeight: FontWeight.w700),)),
                     ],
                   ),
                 ],
@@ -101,12 +126,20 @@ class _OtpFormState extends State<OtpForm> {
 
   late FocusNode pin4FocusNode;
 
+  late FocusNode pin5FocusNode;
+
+  late FocusNode pin6FocusNode;
+
+  String otp = '';
+
   @override
   void initState() {
     super.initState();
     pin2FocusNode = FocusNode();
     pin3FocusNode = FocusNode();
     pin4FocusNode = FocusNode();
+    pin5FocusNode = FocusNode();
+    pin6FocusNode = FocusNode();
 
   }
 
@@ -115,6 +148,8 @@ class _OtpFormState extends State<OtpForm> {
     pin2FocusNode.dispose();
     pin3FocusNode.dispose();
     pin4FocusNode.dispose();
+    pin5FocusNode.dispose();
+    pin6FocusNode.dispose();
     super.dispose();
   }
 
@@ -131,6 +166,9 @@ class _OtpFormState extends State<OtpForm> {
 
   @override
   Widget build(BuildContext context) {
+
+    ConfirmOTPViewModel _confirmOTPViewModel = Provider.of<ConfirmOTPViewModel>(context);
+
     return Form(
      child: Row(
        mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,12 +177,15 @@ class _OtpFormState extends State<OtpForm> {
            width: 45,
            height: 45,
            child: TextFormField(
-             onChanged: (value)=>NextField(value:value,focusNode: pin2FocusNode),
+             onChanged: (value) {
+               otp = value.toString();
+               NextField(value:value,focusNode: pin2FocusNode);
+               print('otp1: $otp');
+             },
              enabled: isEnabled,
              keyboardType: TextInputType.number,
              readOnly: isReadOnly,
              autofocus: true,
-
              obscureText: false,
              textAlign: TextAlign.center,
              style: TextStyle(
@@ -158,7 +199,11 @@ class _OtpFormState extends State<OtpForm> {
            width: 45,
            height: 45,
            child: TextFormField(
-             onChanged: (value)=>NextField(value:value,focusNode: pin3FocusNode),
+             onChanged: (value) {
+               otp = otp + value.toString();
+               NextField(value:value,focusNode: pin3FocusNode);
+               print('otp2: $otp');
+             },
              enabled: isEnabled,
              keyboardType: TextInputType.number,
              readOnly: isReadOnly,
@@ -177,8 +222,11 @@ class _OtpFormState extends State<OtpForm> {
            width: 45,
            height: 45,
            child: TextFormField(
-             onChanged: (value)=>NextField(value:value,focusNode: pin4FocusNode),
-
+             onChanged: (value) {
+               otp = otp + value.toString();
+               NextField(value:value,focusNode: pin4FocusNode);
+               print('otp3: $otp');
+             },
              enabled: isEnabled,
              keyboardType: TextInputType.number,
              readOnly: isReadOnly,
@@ -197,6 +245,11 @@ class _OtpFormState extends State<OtpForm> {
            width: 45,
            height: 45,
            child: TextFormField(
+             onChanged: (value) {
+               otp = otp + value.toString();
+               NextField(value:value,focusNode: pin5FocusNode);
+               print('otp4: $otp');
+             },
              enabled: isEnabled,
              keyboardType: TextInputType.number,
              readOnly: isReadOnly,
@@ -211,6 +264,65 @@ class _OtpFormState extends State<OtpForm> {
              decoration: decorations.otpFormDecoraton,
            ),
          ),
+         Container(
+           width: 45,
+           height: 45,
+           child: TextFormField(
+             onChanged: (value) {
+               otp = otp + value.toString();
+               NextField(value:value,focusNode: pin6FocusNode);
+               print('otp5: $otp');
+             },
+             enabled: isEnabled,
+             keyboardType: TextInputType.number,
+             readOnly: isReadOnly,
+             autofocus: true,
+             focusNode: pin5FocusNode,
+             obscureText: false,
+             textAlign: TextAlign.center,
+             style: TextStyle(
+               fontSize: 20,
+             ),
+             cursorColor: Colors.black.withOpacity(0.8),
+             decoration: decorations.otpFormDecoraton,
+           ),
+         ),
+         Container(
+           width: 45,
+           height: 45,
+           child: TextFormField(
+             onChanged: (v) async {
+               otp = otp + v.toString();
+               print(Singleton.userEmail);
+               print(otp);
+               await Provider.of<ConfirmOTPViewModel>(context, listen: false).confirmOTP(Singleton.userEmail, otp);
+               print("OTP Confirming");
+               if(_confirmOTPViewModel.getOtpStatus == true){
+                 // Navigate to next screen
+                 showSnackBar(context: context, message: "Please Login Again");
+                 Navigator.pushReplacementNamed(context, SignInScreen.id);
+                 isEnabled = false;
+
+               }
+               else{
+                 otp = '';
+               }
+             },
+             enabled: isEnabled,
+             keyboardType: TextInputType.number,
+             readOnly: isReadOnly,
+             autofocus: true,
+             focusNode: pin6FocusNode,
+             obscureText: false,
+             textAlign: TextAlign.center,
+             style: TextStyle(
+               fontSize: 20,
+             ),
+             cursorColor: Colors.black.withOpacity(0.8),
+             decoration: decorations.otpFormDecoraton,
+           ),
+         ),
+
        ],
      ),
     );
